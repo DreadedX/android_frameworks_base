@@ -3675,6 +3675,13 @@ public final class Settings {
          */
         public static final String EGG_MODE = "egg_mode";
 
+        /**
+         * Three Finger Gesture from Oppo
+         * @hide
+         */
+        public static final String THREE_FINGER_GESTURE = "three_finger_gesture";
+
+
         /** @hide */
         public static final Validator EGG_MODE_VALIDATOR = new Validator() {
             @Override
