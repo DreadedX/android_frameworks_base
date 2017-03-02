@@ -1,7 +1,4 @@
 /*
- * Copyright (c) 2013-2016, The Linux Foundation. All rights reserved.
- * Not a Contribution.
- *
  * Copyright (C) 2006 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -302,6 +299,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -551,7 +549,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     final String[] mSeparateProcesses;
     final boolean mIsUpgrade;
     final boolean mIsPreNUpgrade;
-    final boolean mIsAlarmBoot;
     final boolean mIsPreNMR1Upgrade;
 
     @GuardedBy("mPackages")
@@ -1720,6 +1717,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                 // Send added for users that don't see the package for the first time
                 if (update) {
+                    extras = new Bundle(extras);
                     extras.putBoolean(Intent.EXTRA_REPLACING, true);
                 }
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
@@ -4572,7 +4570,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (actionName.startsWith("android.net.netmon.lingerExpired")
                         || actionName.startsWith("com.android.server.sip.SipWakeupTimer")
                         || actionName.startsWith("com.android.internal.telephony.data-reconnect")
-                        || actionName.startsWith("android.net.netmon.launchCaptivePortalApp")) {
+                        || actionName.startsWith("android.net.netmon.launchCaptivePortalApp")
+                        || actionName.startsWith("masquerade.substratum.STATUS_CHANGED")) {
                     return true;
                 }
             }
@@ -10451,6 +10450,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 & PermissionInfo.PROTECTION_FLAG_PRIVILEGED) != 0) {
             if (isSystemApp(pkg)) {
                 // For updated system applications, a system permission
+                // is granted only if it had been defined by the original application.
                 if (pkg.isUpdatedSystemApp()) {
                     final PackageSetting sysPs = mSettings
                             .getDisabledSystemPkgLPr(pkg.packageName);
@@ -21448,6 +21448,46 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public boolean wasPackageEverLaunched(String packageName, int userId) {
             synchronized (mPackages) {
                 return mSettings.wasPackageEverLaunchedLPr(packageName, userId);
+            }
+        }
+
+        @Override
+        public List<PackageInfo> getOverlayPackages(int userId) {
+            final ArrayList<PackageInfo> overlayPackages = new ArrayList<PackageInfo>();
+            synchronized (mPackages) {
+                for (PackageParser.Package p : mPackages.values()) {
+                    if (p.mOverlayTarget != null) {
+                        PackageInfo pkg = generatePackageInfo((PackageSetting)p.mExtras, 0, userId);
+                        if (pkg != null) {
+                            overlayPackages.add(pkg);
+                        }
+                    }
+                }
+            }
+            return overlayPackages;
+        }
+
+        @Override
+        public List<String> getTargetPackageNames(int userId) {
+            List<String> targetPackages = new ArrayList<>();
+            synchronized (mPackages) {
+                for (PackageParser.Package p : mPackages.values()) {
+                    if (p.mOverlayTarget == null) {
+                        targetPackages.add(p.packageName);
+                    }
+                }
+            }
+            return targetPackages;
+        }
+
+        @Override
+        public void setResourceDirs(int userId, String packageName, String[] resourceDirs) {
+            synchronized (mPackages) {
+                final PackageSetting ps = mSettings.mPackages.get(packageName);
+                if (ps == null) {
+                    return;
+                }
+                ps.setResourceDirs(resourceDirs, userId);
             }
         }
     }
