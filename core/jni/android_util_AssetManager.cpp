@@ -130,7 +130,7 @@ jint copyValue(JNIEnv* env, jobject outValue, const ResTable* table,
 }
 
 // This is called by zygote (running as user root) as part of preloadResources.
-static void verifySystemIdmaps()
+static void verifySystemIdmaps(const char* overlay_dir)
 {
     pid_t pid;
     char system_id[10];
@@ -187,8 +187,8 @@ static void verifySystemIdmaps()
 
                 // Directories to scan for overlays
                 // /vendor/overlay
-                if (stat(AssetManager::OVERLAY_DIR, &st) == 0) {
-                    argv[argc++] = AssetManager::OVERLAY_DIR;
+                if (stat(overlay_dir, &st) == 0) {
+                    argv[argc++] = overlay_dir;
                  }
 
                 // Finally, invoke idmap (if any overlay directory exists)

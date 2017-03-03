@@ -549,6 +549,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     final String[] mSeparateProcesses;
     final boolean mIsUpgrade;
     final boolean mIsPreNUpgrade;
+    final boolean mIsAlarmBoot;
     final boolean mIsPreNMR1Upgrade;
 
     @GuardedBy("mPackages")
@@ -16624,7 +16625,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     false /*hidden*/, false /*suspended*/, null, null, null,
                     false /*blockUninstall*/,
                     ps.readUserState(nextUserId).domainVerificationStatus, 0,
-                    null, null);
+                    null, null, null);
         }
     }
 
