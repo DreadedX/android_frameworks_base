@@ -25,6 +25,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <sys/system_properties.h>
 
 #include <private/android_filesystem_config.h> // for AID_SYSTEM
 #include <private/regionalization/Environment.h>
@@ -42,6 +43,7 @@
 #include "ScopedUtfChars.h"
 #include "utils/Log.h"
 #include "utils/misc.h"
+#include "utils/String8.h"
 
 extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
 extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
@@ -206,7 +208,6 @@ static void verifySystemIdmaps(const char* overlay_dir)
             break;
     }
 }
-
 // ----------------------------------------------------------------------------
 
 // this guy is exported to other jni routines
@@ -2077,6 +2078,7 @@ static jintArray android_content_AssetManager_getStyleAttributes(JNIEnv* env, jo
 
 static void android_content_AssetManager_init(JNIEnv* env, jobject clazz, jboolean isSystem)
 {
+<<<<<<< HEAD
     if (isSystem) {
         // Load frameworks-res.apk's overlay through regionalization environment
         if (Environment::isSupported()) {
@@ -2093,6 +2095,8 @@ static void android_content_AssetManager_init(JNIEnv* env, jobject clazz, jboole
 
         verifySystemIdmaps(AssetManager::OVERLAY_DIR);
     }
+=======
+>>>>>>> substratum/n-mr2
     AssetManager* am = new AssetManager();
     if (am == NULL) {
         jniThrowException(env, "java/lang/OutOfMemoryError", "");

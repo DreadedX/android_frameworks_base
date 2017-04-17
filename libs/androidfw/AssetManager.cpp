@@ -80,6 +80,7 @@ static volatile int32_t gCount = 0;
 const char* AssetManager::RESOURCES_FILENAME = "resources.arsc";
 const char* AssetManager::IDMAP_BIN = "/system/bin/idmap";
 const char* AssetManager::OVERLAY_DIR = "/vendor/overlay";
+const char* AssetManager::OVERLAY_THEME_DIR_PROPERTY = "ro.boot.vendor.overlay.theme";
 const char* AssetManager::TARGET_PACKAGE_NAME = "android";
 const char* AssetManager::TARGET_APK_PATH = "/system/framework/framework-res.apk";
 const char* AssetManager::IDMAP_DIR = "/data/resource-cache";
@@ -213,15 +214,6 @@ bool AssetManager::addAssetPath(
     if (cookie) {
         *cookie = static_cast<int32_t>(mAssetPaths.size());
     }
-
-#ifdef __ANDROID__
-    // Load overlays, if any
-    asset_path oap;
-    for (size_t idx = 0; mZipSet.getOverlay(ap.path, idx, &oap); idx++) {
-        oap.isSystemAsset = isSystemAsset;
-        mAssetPaths.add(oap);
-    }
-#endif
 
     if (mResources != NULL) {
         appendPathToResTable(ap, appAsLib);
@@ -618,11 +610,6 @@ FileType AssetManager::getFileType(const char* fileName)
 }
 
 bool AssetManager::appendPathToResTable(const asset_path& ap, bool appAsLib) const {
-    // skip those ap's that correspond to system overlays
-    if (ap.isSystemOverlay) {
-        return true;
-    }
-
     Asset* ass = NULL;
     ResTable* sharedRes = NULL;
     bool shared = true;
@@ -664,14 +651,6 @@ bool AssetManager::appendPathToResTable(const asset_path& ap, bool appAsLib) con
                 ALOGV("Creating shared resources for %s", ap.path.string());
                 sharedRes = new ResTable();
                 sharedRes->add(ass, idmap, nextEntryIdx + 1, false);
-#ifdef __ANDROID__
-                const char* data = getenv("ANDROID_DATA");
-                LOG_ALWAYS_FATAL_IF(data == NULL, "ANDROID_DATA not set");
-                String8 overlaysListPath(data);
-                overlaysListPath.appendPath(kResourceCache);
-                overlaysListPath.appendPath("overlays.list");
-                addSystemOverlays(overlaysListPath.string(), ap.path, sharedRes, nextEntryIdx);
-#endif
                 sharedRes = const_cast<AssetManager*>(this)->
                     mZipSet.setZipResourceTable(ap.path, sharedRes);
             }
@@ -1974,20 +1953,6 @@ bool AssetManager::SharedZip::isUpToDate()
     return mModWhen == modWhen;
 }
 
-void AssetManager::SharedZip::addOverlay(const asset_path& ap)
-{
-    mOverlays.add(ap);
-}
-
-bool AssetManager::SharedZip::getOverlay(size_t idx, asset_path* out) const
-{
-    if (idx >= mOverlays.size()) {
-        return false;
-    }
-    *out = mOverlays[idx];
-    return true;
-}
-
 AssetManager::SharedZip::~SharedZip()
 {
     if (kIsDebug) {
@@ -2127,22 +2092,6 @@ bool AssetManager::ZipSet::isUpToDate()
         }
     }
     return true;
-}
-
-void AssetManager::ZipSet::addOverlay(const String8& path, const asset_path& overlay)
-{
-    int idx = getIndex(path);
-    sp<SharedZip> zip = mZipFile[idx];
-    zip->addOverlay(overlay);
-}
-
-bool AssetManager::ZipSet::getOverlay(const String8& path, size_t idx, asset_path* out) const
-{
-    sp<SharedZip> zip = SharedZip::get(path, false);
-    if (zip == NULL) {
-        return false;
-    }
-    return zip->getOverlay(idx, out);
 }
 
 /*
