@@ -312,6 +312,7 @@ public class VisualizerView extends View
         if (color == Color.TRANSPARENT) {
             color = Color.WHITE;
         }
+		color = Color.RED;
 
         color = Color.argb(140, Color.red(color), Color.green(color), Color.blue(color));
 
