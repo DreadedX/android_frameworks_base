@@ -245,7 +245,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // additional instrumentation for testing purposes; intended to be left on during development
     public static final boolean CHATTY = DEBUG;
 
-    public static final boolean SHOW_LOCKSCREEN_MEDIA_ARTWORK = false;
+    public static final boolean SHOW_LOCKSCREEN_MEDIA_ARTWORK = true;
 
     public static final String ACTION_FAKE_ARTWORK = "fake_artwork";
 
@@ -2364,6 +2364,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      */
     public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
         Trace.beginSection("PhoneStatusBar#updateMediaMetaData");
+        if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) {
+            Trace.endSection();
+            return;
+        }
         if (mBackdrop == null) {
             Trace.endSection();
             return; // called too early
@@ -2384,14 +2388,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         Drawable artworkDrawable = null;
         if (mMediaMetadata != null && mShowMediaMetadata) {
-            Bitmap artworkBitmap = null;
-            artworkBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
-            if (artworkBitmap == null) {
-                artworkBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
-                // might still be null
-            }
-            if (artworkBitmap != null) {
-                artworkDrawable = new BitmapDrawable(mBackdropBack.getResources(), artworkBitmap);
             }
         }
         mKeyguardShowingMedia = artworkDrawable != null;
@@ -2428,15 +2424,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             // always use current backdrop to color eq
             mVisualizerView.setBitmap(((BitmapDrawable)artworkDrawable).getBitmap());
         }
-
-        if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) {
-			if (mStatusBarWindowManager != null) {
-				mStatusBarWindowManager.setShowingMedia(hasArtwork);
-			}
-            Trace.endSection();
-            return;
-        }
-
 
         if ((hasArtwork || DEBUG_MEDIA_FAKE_ARTWORK)
                 && (mState != StatusBarState.SHADE || allowWhenShade)
