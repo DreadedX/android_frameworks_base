@@ -2388,7 +2388,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         Drawable artworkDrawable = null;
         if (mMediaMetadata != null && mShowMediaMetadata) {
-            }
+			Bitmap artworkBitmap = null;
+			artworkBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
+			if (artworkBitmap == null) {
+				artworkBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+				// might still be null
+			}
+			if (artworkBitmap != null) {
+				artworkDrawable = new BitmapDrawable(mBackdropBack.getResources(), artworkBitmap);
+			}
         }
         mKeyguardShowingMedia = artworkDrawable != null;
 
@@ -2411,7 +2419,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         final boolean keyguardVisible = (mState != StatusBarState.SHADE);
         final boolean hasArtwork = artworkDrawable != null;
 
-        if (!mKeyguardFadingAway && keyguardVisible && hasArtwork && mScreenOn) {
+        if (!mKeyguardFadingAway && keyguardVisible && mScreenOn) {
             // if there's album art, ensure visualizer is visible
             mVisualizerView.setPlaying(mMediaController != null
                     && mMediaController.getPlaybackState() != null

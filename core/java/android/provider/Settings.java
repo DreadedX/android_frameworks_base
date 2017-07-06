@@ -3709,6 +3709,9 @@ public final class Settings {
           */
          public static final String VOLUME_KEY_CURSOR_CONTROL = "volume_key_cursor_control";
 
+		 public static final String TWEAKS_VISUALIZER_COLOR = "tweaks_visualizer_color";
+		 public static final String TWEAKS_VISUALIZER_CUSTOM_COLOR = "tweaks_visualizer_custom_color";
+
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
@@ -3817,6 +3820,8 @@ public final class Settings {
             PUBLIC_SETTINGS.add(HAPTIC_FEEDBACK_ENABLED);
             PUBLIC_SETTINGS.add(SHOW_WEB_SUGGESTIONS);
             PUBLIC_SETTINGS.add(VIBRATE_WHEN_RINGING);
+            PUBLIC_SETTINGS.add(TWEAKS_VISUALIZER_COLOR);
+            PUBLIC_SETTINGS.add(TWEAKS_VISUALIZER_CUSTOM_COLOR);
         }
 
         /**

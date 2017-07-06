@@ -29,6 +29,7 @@ import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.provider.Settings;
 
 import com.android.systemui.tuner.TunerService;
 
@@ -42,6 +43,10 @@ public class VisualizerView extends View
 
     private static final String LOCKSCREEN_VISUALIZER_ENABLED =
             "cmsecure:" + CMSettings.Secure.LOCKSCREEN_VISUALIZER_ENABLED;
+    private static final String TWEAKS_VISUALIZER_COLOR =
+            "system:" + Settings.System.TWEAKS_VISUALIZER_COLOR;
+    private static final String TWEAKS_VISUALIZER_CUSTOM_COLOR =
+            "system:" + Settings.System.TWEAKS_VISUALIZER_CUSTOM_COLOR;
 
     private Paint mPaint;
     private Visualizer mVisualizer;
@@ -52,6 +57,8 @@ public class VisualizerView extends View
 
     private int mStatusBarState;
     private boolean mVisualizerEnabled = false;
+    private int mVisualizerColor = 0xffffffff;
+    private boolean mVisualizerCustomColor = false;
     private boolean mVisible = false;
     private boolean mPlaying = false;
     private boolean mPowerSaveMode = false;
@@ -184,7 +191,7 @@ public class VisualizerView extends View
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        TunerService.get(mContext).addTunable(this, LOCKSCREEN_VISUALIZER_ENABLED);
+        TunerService.get(mContext).addTunable(this, LOCKSCREEN_VISUALIZER_ENABLED, TWEAKS_VISUALIZER_COLOR);
     }
 
     @Override
@@ -289,7 +296,7 @@ public class VisualizerView extends View
         if (bitmap != null) {
             Palette.generateAsync(bitmap, this);
         } else {
-            setColor(Color.TRANSPARENT);
+			setColor(Color.TRANSPARENT);
         }
     }
 
@@ -297,22 +304,25 @@ public class VisualizerView extends View
     public void onGenerated(Palette palette) {
         int color = Color.TRANSPARENT;
 
-        color = palette.getVibrantColor(color);
-        if (color == Color.TRANSPARENT) {
-            color = palette.getLightVibrantColor(color);
-            if (color == Color.TRANSPARENT) {
-                color = palette.getDarkVibrantColor(color);
-            }
-        }
+		color = palette.getVibrantColor(color);
+		if (color == Color.TRANSPARENT) {
+			color = palette.getLightVibrantColor(color);
+			if (color == Color.TRANSPARENT) {
+				color = palette.getDarkVibrantColor(color);
+			}
+		}
 
         setColor(color);
     }
 
     private void setColor(int color) {
+		if (mVisualizerCustomColor) {
+			color = mVisualizerColor;
+		}
+
         if (color == Color.TRANSPARENT) {
             color = Color.WHITE;
         }
-		color = Color.RED;
 
         color = Color.argb(140, Color.red(color), Color.green(color), Color.blue(color));
 
@@ -366,11 +376,21 @@ public class VisualizerView extends View
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (!LOCKSCREEN_VISUALIZER_ENABLED.equals(key)) {
-            return;
-        }
-        mVisualizerEnabled = newValue == null || Integer.parseInt(newValue) != 0;
-        checkStateChanged();
-        updateViewVisibility();
+		switch (key) {
+			case LOCKSCREEN_VISUALIZER_ENABLED:
+				mVisualizerEnabled = newValue == null || Integer.parseInt(newValue) != 0;
+				break;
+			case TWEAKS_VISUALIZER_COLOR:
+				  mVisualizerColor = (newValue != null) ? Integer.parseInt(newValue) : 0xffffffff;
+				break;
+			case TWEAKS_VISUALIZER_CUSTOM_COLOR:
+				mVisualizerCustomColor = newValue == null || Integer.parseInt(newValue) != 0;
+				break;
+			default:
+				return;
+		}
+		setColor(mVisualizerColor);
+		checkStateChanged();
+		updateViewVisibility();
     }
 }
