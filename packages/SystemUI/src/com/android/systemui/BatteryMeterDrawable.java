@@ -262,17 +262,6 @@ public class BatteryMeterDrawable extends Drawable implements
     public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
         mLevel = level;
         mPluggedIn = pluggedIn;
-        if (level <31) {
-            //on non circle battery styles, when level is <31, the level bar doesn't cover the level pct txt inside
-            //the battery icon, so we'll set the pct txt color to white to have it more visible on the frame background
-            isPctToBeWhiteOrRed = true;
-        }
-
-        if (Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.STATUS_BAR_PULSE_CHARGING_BATTERY, 0) == 1 ||
-                mStyle == BATTERY_STYLE_SOLID) {
-            pulseBatteryIcon(level, pluggedIn, charging);
-        }
 
         postInvalidate();
     }
@@ -349,37 +338,6 @@ public class BatteryMeterDrawable extends Drawable implements
             }
         }
         return color;
-    }
-
-    public void pulseBatteryIcon(int level, boolean pluggedIn, boolean charging) {
-        if (charging) {
-            if (mAnimator != null) mAnimator.cancel();
-
-            final int defaultAlpha = mLevelDrawable.getAlpha();
-            mAnimator = ValueAnimator.ofInt(defaultAlpha, 0, defaultAlpha);
-            mAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    mLevelDrawable.setAlpha((int) animation.getAnimatedValue());
-                    invalidateSelf();
-                }
-            });
-            mAnimator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationCancel(Animator animation) {
-                    mLevelDrawable.setAlpha(defaultAlpha);
-                    mAnimator = null;
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLevelDrawable.setAlpha(defaultAlpha);
-                    mAnimator = null;
-                }
-            });
-            mAnimator.setDuration(2000);
-            mAnimator.start();
-        }
     }
 
     public void setDarkIntensity(float darkIntensity) {
