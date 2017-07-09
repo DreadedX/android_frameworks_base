@@ -3675,13 +3675,6 @@ public final class Settings {
          */
         public static final String EGG_MODE = "egg_mode";
 
-        /**
-         * Three Finger Gesture from Oppo
-         * @hide
-         */
-        public static final String THREE_FINGER_GESTURE = "three_finger_gesture";
-
-
         /** @hide */
         public static final Validator EGG_MODE_VALIDATOR = new Validator() {
             @Override
@@ -3742,6 +3735,12 @@ public final class Settings {
          * @hide
          */
         public static final String  RECENTS_CLEAR_ALL_LOCATION = "recents_clear_all_location";
+
+        /**
+         * Three Finger Gesture from Oppo
+         * @hide
+         */
+        public static final String THREE_FINGER_GESTURE = "three_finger_gesture";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -3857,6 +3856,8 @@ public final class Settings {
             PUBLIC_SETTINGS.add(SCREENSHOT_CROP_AND_SHARE);
             PUBLIC_SETTINGS.add(SCREENSHOT_CROP_BEHAVIOR);
             PUBLIC_SETTINGS.add(THREE_FINGER_GESTURE);
+            PUBLIC_SETTINGS.add(SHOW_CLEAR_ALL_RECENTS);
+            PUBLIC_SETTINGS.add(RECENTS_CLEAR_ALL_LOCATION);
         }
 
         /**
