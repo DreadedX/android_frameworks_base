@@ -3743,6 +3743,12 @@ public final class Settings {
         public static final String THREE_FINGER_GESTURE = "three_finger_gesture";
 
         /**
+         * Whether to enable status and navigation bar color in battery saver mode.
+         * @hide
+         */
+        public static final String BATTERY_SAVER_MODE_COLOR = "battery_save_mode_color";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -3858,6 +3864,7 @@ public final class Settings {
             PUBLIC_SETTINGS.add(THREE_FINGER_GESTURE);
             PUBLIC_SETTINGS.add(SHOW_CLEAR_ALL_RECENTS);
             PUBLIC_SETTINGS.add(RECENTS_CLEAR_ALL_LOCATION);
+            PUBLIC_SETTINGS.add(BATTERY_SAVER_MODE_COLOR);
         }
 
         /**

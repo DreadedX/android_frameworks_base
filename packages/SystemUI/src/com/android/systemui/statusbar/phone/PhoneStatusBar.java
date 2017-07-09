@@ -444,6 +444,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     int mInitialTouchX;
     int mInitialTouchY;
 
+    private boolean mSystemNavigationKeysEnabled;
+    private int mFpSwipeCallActions;
+
+    private int mBatterySaverWarningColor;
+
     // for disabling the status bar
     int mDisabled1 = 0;
     int mDisabled2 = 0;
@@ -483,6 +488,122 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         void observe() {
+           ContentResolver resolver = mContext.getContentResolver();
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.SHOW_LTE_FOURGEE),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.STATUS_BAR_DU_LOGO),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.STATUS_BAR_SHOW_CARRIER),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.Secure.getUriFor(
+                  Settings.Secure.LOCK_QS_DISABLED),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.QS_LAYOUT_COLUMNS),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.QS_ROWS_PORTRAIT),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.QS_ROWS_LANDSCAPE),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.DATA_ACTIVITY_ARROWS),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.STATUS_BAR_CUSTOM_HEADER_SHADOW),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.STATUS_BAR_CUSTOM_HEADER),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.STATUS_BAR_SHOW_TICKER),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.QS_QUICKBAR_SCROLL_ENABLED),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.STATUS_BAR_CLOCK),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.STATUSBAR_CLOCK_STYLE),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.SCREEN_BRIGHTNESS_MODE),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.QS_FOOTER_WARNINGS),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.STATUS_BAR_QUICK_QS_PULLDOWN_FP),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.AMBIENT_DOZE_CUSTOM_BRIGHTNESS),
+                  false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                  Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED),
+                  false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.FP_SWIPE_CALL_ACTIONS),
+                  false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BATTERY_SAVER_MODE_COLOR),
+                    false, this, UserHandle.USER_ALL);
+           updateSettings();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.SHOW_LTE_FOURGEE))) {
+                    mShowLteFourGee = Settings.System.getIntForUser(
+                            mContext.getContentResolver(),
+                            Settings.System.SHOW_LTE_FOURGEE,
+                            0, UserHandle.USER_CURRENT) == 1;
+                    mNetworkController.onConfigurationChanged();
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.QS_ROWS_PORTRAIT))
+                    || uri.equals(Settings.System.getUriFor(
+                    Settings.System.QS_ROWS_LANDSCAPE))) {
+                    updateResources();
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_SHOW_CARRIER))) {
+                    updateSettings();
+                    updateCarrier();
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.DATA_ACTIVITY_ARROWS))) {
+                    mDataWifiActivityArrows = Settings.System.getIntForUser(
+                            mContext.getContentResolver(),
+                            Settings.System.DATA_ACTIVITY_ARROWS,
+                            0, UserHandle.USER_CURRENT) == 1;
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_SHOW_TICKER))) {
+                    mTickerEnabled = Settings.System.getIntForUser(
+                            mContext.getContentResolver(),
+                            Settings.System.STATUS_BAR_SHOW_TICKER,
+                            0, UserHandle.USER_CURRENT);
+                    initTickerView();
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.BATTERY_SAVER_MODE_COLOR))) {
+                    mBatterySaverWarningColor = Settings.System.getIntForUser(
+                            mContext.getContentResolver(),
+                            Settings.System.BATTERY_SAVER_MODE_COLOR, 1,
+                            UserHandle.USER_CURRENT);
+                    if (mBatterySaverWarningColor != 0) {
+                        mBatterySaverWarningColor = mContext.getResources()
+                                .getColor(com.android.internal.R.color.battery_saver_mode_color);
+                    }
+            }
+            updateSettings();
+        }
+
+        public void updateSettings() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(CMSettings.Global.getUriFor(
                     CMSettings.Global.DEV_FORCE_SHOW_NAVBAR), false, this, UserHandle.USER_ALL);
@@ -992,6 +1113,22 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         R.id.keyguard_indication_text),
                 mKeyguardBottomArea.getLockIcon());
         mKeyguardBottomArea.setKeyguardIndicationController(mKeyguardIndicationController);
+
+        mBatterySaverWarningColor = Settings.System.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.System.BATTERY_SAVER_MODE_COLOR, 1,
+                UserHandle.USER_CURRENT);
+        if (mBatterySaverWarningColor != 0) {
+            mBatterySaverWarningColor = mContext.getResources()
+                   .getColor(com.android.internal.R.color.battery_saver_mode_color);
+        }
+
+        mCenterClock = (TextView) mStatusBarWindow.findViewById(R.id.center_clock);
+
+        mTickerEnabled = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_SHOW_TICKER,
+                0, UserHandle.USER_CURRENT);
+        initTickerView();
 
         // set the initial view visibility
         setAreThereNotifications();
@@ -3443,6 +3580,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 && windowState != WINDOW_STATE_HIDDEN && !powerSave;
         if (powerSave && getBarState() == StatusBarState.SHADE) {
             mode = MODE_WARNING;
+        }
+        if (mode == MODE_WARNING) {
+            transitions.setWarningColor(mBatterySaverWarningColor);
         }
         transitions.transitionTo(mode, anim);
     }
