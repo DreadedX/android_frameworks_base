@@ -87,12 +87,6 @@ public class BarTransitions {
         return !HIGH_END || mAlwaysOpaque;
     }
 
-    public void setWarningColor(int color) {
-        if (mBarBackground != null) {
-            mBarBackground.setWarningColor(color);
-        }
-    }
-
     public void transitionTo(int mode, boolean animate) {
         if (isAlwaysOpaque() && (mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSLUCENT
                 || mode == MODE_TRANSPARENT)) {
@@ -144,7 +138,7 @@ public class BarTransitions {
         private final int mOpaque;
         private final int mSemiTransparent;
         private final int mTransparent;
-        private int mWarning;
+        private final int mWarning;
         private final Drawable mGradient;
 
         private int mMode = -1;
@@ -212,12 +206,6 @@ public class BarTransitions {
         protected void onBoundsChange(Rect bounds) {
             super.onBoundsChange(bounds);
             mGradient.setBounds(bounds);
-        }
-
-        public void setWarningColor(int color) {
-            if (!DEBUG_COLORS) {
-                mWarning = color;
-            }
         }
 
         public void applyModeBackground(int oldMode, int newMode, boolean animate) {
