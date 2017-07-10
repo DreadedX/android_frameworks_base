@@ -32,6 +32,7 @@ import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -60,7 +61,7 @@ import com.android.systemui.statusbar.policy.WeatherController;
 import com.android.systemui.tuner.TunerService;
 
 public class QuickStatusBarHeader extends BaseStatusBarHeader implements
-        NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener, EmergencyListener,
+        NextAlarmChangeCallback, OnClickListener, OnLongClickListener, OnUserInfoChangedListener, EmergencyListener,
         SignalCallback {
 
     private static final String TAG = "QuickStatusBarHeader";
@@ -149,6 +150,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mAlarmStatus.setOnClickListener(this);
 
         mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
+		mMultiUserSwitch.setOnLongClickListener(this);
         mMultiUserAvatar = (ImageView) mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
 
         // RenderThread is doing more harm than good when touching the header (to expand quick
@@ -379,6 +381,14 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         }
     }
 
+	@override
+	public boolean onLongClick(View view) {
+		if (view == mMultiUserSwitch) {
+			startUserLongClickActivity();
+		}
+		return true;
+	}
+
     private void startClockActivity(AlarmManager.AlarmClockInfo alarm) {
         Intent intent = null;
         if (alarm != null) {
@@ -403,6 +413,12 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mActivityStarter.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS),
                 true /* dismissShade */);
     }
+
+	private void startUserLongClickActivity() {
+		Intent intent = new Intent(Intent.ACTION_MAIN);
+		intent.setClassName("com.android.settings", "com.android.settings.Settings$UserSettingsActivity");
+		mActivityStarter.startActivity(intent, true);
+	}
 
     @Override
     public void setNextAlarmController(NextAlarmController nextAlarmController) {
