@@ -381,7 +381,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         }
     }
 
-	@override
+	@Override
 	public boolean onLongClick(View view) {
 		if (view == mMultiUserSwitch) {
 			startUserLongClickActivity();

@@ -15,24 +15,6 @@
      limitations under the License.
 -->
 <resources>
-    <!-- Status bar battery colors -->
-    <color name="status_bar_battery_level_text_color">#ffffff</color>
-    <color name="batterymeter_frame_color_darkintensity">@color/dark_mode_icon_color_dual_tone_background</color>
-
-    <!-- Floating action button -->
-    <color name="fab_color">@*android:color/material_deep_teal_500</color>
-    <color name="floating_action_button_icon_color">#ffffff</color>
-
-    <!-- carrier label color -->
-    <color name="status_bar_carrier_color">#FFFFFFFF</color>
-    <!-- Navigation button ripple color -->
-    <color name="navbutton_ripple_color">#FFFFFFFF</color>
-
-    <!-- OmniJaws detailed view temperature text -->
-    <color name="omni_jaws_detailed_temperature_color">@android:color/white</color>
-
-    <!-- Recents Memory bar -->
-    <color name="recents_memory_text_color">@android:color/white</color>
 
     <!-- SS Crop & Share -->
     <color name="crop_handle">#E0E0E0</color>
